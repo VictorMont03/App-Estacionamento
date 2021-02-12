@@ -20,7 +20,7 @@ window.onload=function(){ /*Parece que document.getElementById('btn');está reto
             };
     /*função que renderiza a garagem na tela*/
     function renderGarage(){
-        
+        $("#garage").innerHTML = "";
         let garage = localStorage.getItem("garage");
         garage = JSON.parse(garage);
         if(garage == null){
@@ -61,8 +61,44 @@ window.onload=function(){ /*Parece que document.getElementById('btn');está reto
     });
 
     function checkout(info){
-        const placa = info[1].textContent; /*pegou a informação da segunda coluna - placa*/
-        console.log(placa)
+        const veiculo = info[0].textContent;
+        const placa = info[1].textContent;/*pegou a informação da segunda coluna - placa*/
+        let periodo = new Date() - new Date(info[2].dataset.time); /*faz a diferença de tempo de chegada e saida em ms*/
+        periodo = convertTime(periodo);
+        const msg = `O tempo de estádia do veículo ${veiculo} (${placa}) no pátio foi de ${periodo}. Deseja encerrar?`;
+        if(confirm(msg)){
+            const garage = getGarage().filter(c => c.placa !== placa);
+            localStorage.garage =JSON.stringify(garage);
+            renderGarage();
+        }
+    }
 
+    function convertTime(ms){
+        let min = Math.floor(ms / 60000); /*math.floor = inteiro*/
+        const sec = Math.floor((ms % 60000) / 1000);
+        const valor = calculoPreco(min);
+        if(min > 60){
+            const hora = Math.floor(min / 60);
+            min = min % 60;
+            return `${hora}hrs, ${min}min e ${sec}seg no valor de ${valor}`;
+        }else{
+            return `${min}min e ${sec}seg no valor de ${valor}`;
+        }
+        
+    }
+
+    function calculoPreco(min){
+        if(min < 30){
+            return `$10,00`;
+        }else if(min < 60){
+            return `$20,00`;
+        }else{
+            const hora = Math.floor(min / 60);
+            let valor = 20;
+            for(i = 0; i < hora - 1; i++){   
+                valor = valor + 10; 
+            }
+            return `$${valor},00`;   
+        }
     }
 };
